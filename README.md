@@ -4,7 +4,12 @@ Uma releitura do clássico Sokoban da Spectrum HoloByte, com o visual
 retrô dos PCs dos anos 80 (paleta CGA ciano/magenta) mas com cores
 mais vivas e suaves para monitores atuais.
 
-## Dependências (Linux)
+## Dependências
+
+**macOS (Homebrew):**
+```bash
+brew install sdl2 sdl2_ttf
+```
 
 **Debian / Ubuntu / Mint:**
 ```bash
@@ -27,6 +32,9 @@ make        # compila
 make run    # compila e executa
 ./sokoban   # ou rode direto
 ```
+
+O jogo tenta carregar a fonte em `assets/fonts/RobotoMono-Bold.ttf` e,
+se não encontrar, usa fontes do sistema (SF Mono no macOS, DejaVu no Linux).
 
 ## Controles
 | Tecla | Ação |

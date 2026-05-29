@@ -2,7 +2,7 @@
  * SOKO-BAN  —  versão nostálgica (estilo CGA/EGA anos 80)
  * Homenagem ao Sokoban original de Spectrum HoloByte (1984).
  *
- * Compilar:  gcc sokoban.c -o sokoban $(sdl2-config --cflags --libs) -lSDL2_ttf -lm
+ * Compilar:  make
  * Rodar:     ./sokoban
  *
  * Controles:
@@ -14,8 +14,8 @@
  *   ESC / Q ......... sair
  */
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,14 +23,14 @@
 
 /* ---------- Paleta: CGA "atualizada" (cores vivas, espírito 80s) ---------- */
 typedef struct { Uint8 r, g, b; } Color;
-static const Color C_BLACK   = {  12,  10,  24 };  /* fundo escuro azulado   */
-static const Color C_CYAN    = {  40, 220, 220 };  /* piso / ciano CGA       */
-static const Color C_MAGENTA = { 230,  60, 200 };  /* paredes / magenta CGA  */
-static const Color C_WHITE   = { 240, 240, 255 };  /* texto / player         */
-static const Color C_DKMAG   = { 120,  20, 110 };  /* sombra de parede       */
-static const Color C_GOLD    = { 245, 200,  60 };  /* caixas                 */
-static const Color C_DKGOLD  = { 170, 120,  20 };  /* sombra de caixa        */
-static const Color C_GREEN   = {  80, 230, 120 };  /* caixa no alvo          */
+static const Color C_BLACK   = {  12,  10,  24 };
+static const Color C_CYAN    = {  40, 220, 220 };
+static const Color C_MAGENTA = { 230,  60, 200 };
+static const Color C_WHITE   = { 240, 240, 255 };
+static const Color C_DKMAG   = { 120,  20, 110 };
+static const Color C_GOLD    = { 245, 200,  60 };
+static const Color C_DKGOLD  = { 170, 120,  20 };
+static const Color C_GREEN   = {  80, 230, 120 };
 static const Color C_DKGRN   = {  30, 140,  70 };
 
 /* ---------- Tiles ---------- */
@@ -38,18 +38,19 @@ static const Color C_DKGRN   = {  30, 140,  70 };
 #define FLOOR  ' '
 #define GOAL   '.'
 #define BOX    '$'
-#define BOXG   '*'   /* caixa sobre alvo */
+#define BOXG   '*'
 #define PLAYER '@'
-#define PLYRG  '+'   /* player sobre alvo */
+#define PLYRG  '+'
 
 #define MAXW 32
 #define MAXH 24
 #define TILE 28
 #define HUD  40
 
+#define BUNDLED_FONT "RobotoMono-Bold.ttf"
+
 /* ---------- Fases (clássicas Sokoban) ---------- */
 static const char *levels[] = {
-/* 1 */
 "    #####\n"
 "    #   #\n"
 "    #$  #\n"
@@ -61,7 +62,6 @@ static const char *levels[] = {
 "##### ### #@##  ..#\n"
 "    #     #########\n"
 "    #######\n",
-/* 2 */
 "############\n"
 "#..  #     ###\n"
 "#..  # $  $  #\n"
@@ -72,7 +72,6 @@ static const char *levels[] = {
 "  # $  $ $ $ #\n"
 "  #    #     #\n"
 "  ############\n",
-/* 3 */
 "        ########\n"
 "        #     @#\n"
 "        # $#$ ##\n"
@@ -83,7 +82,6 @@ static const char *levels[] = {
 "##...    $  $   #\n"
 "#....  ##########\n"
 "########\n",
-/* 4 */
 "           #####\n"
 "           #   #\n"
 "           #$  #\n"
@@ -115,6 +113,8 @@ static int undo_top = 0;
 static int level_index = 0;
 static Board B;
 
+typedef enum { SC_TITLE, SC_PLAY, SC_WIN } Scene;
+
 /* ---------- Helpers de desenho ---------- */
 static void set_color(SDL_Renderer *r, Color c) {
     SDL_SetRenderDrawColor(r, c.r, c.g, c.b, 255);
@@ -123,6 +123,49 @@ static void fill(SDL_Renderer *r, int x, int y, int w, int h, Color c) {
     SDL_Rect rc = { x, y, w, h };
     set_color(r, c);
     SDL_RenderFillRect(r, &rc);
+}
+
+/* ---------- Fontes (Linux / macOS) ---------- */
+static bool try_open_fonts(const char *path, TTF_Font **font, TTF_Font **big) {
+    if (!path || !*path) return false;
+    TTF_Font *f = TTF_OpenFont(path, 18);
+    TTF_Font *b = TTF_OpenFont(path, 40);
+    if (f && b) {
+        *font = f;
+        *big = b;
+        return true;
+    }
+    if (f) TTF_CloseFont(f);
+    if (b) TTF_CloseFont(b);
+    return false;
+}
+
+static bool open_fonts(TTF_Font **font, TTF_Font **big) {
+    char bundled[512];
+
+    snprintf(bundled, sizeof bundled, "assets/fonts/%s", BUNDLED_FONT);
+    if (try_open_fonts(bundled, font, big)) return true;
+
+#ifdef __APPLE__
+    const char *mac_fonts[] = {
+        "/System/Library/Fonts/SFNSMono.ttf",
+        "/Library/Fonts/Courier New Bold.ttf",
+        NULL
+    };
+    for (int i = 0; mac_fonts[i]; i++)
+        if (try_open_fonts(mac_fonts[i], font, big)) return true;
+#endif
+
+    const char *linux_fonts[] = {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf",
+        "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf",
+        NULL
+    };
+    for (int i = 0; linux_fonts[i]; i++)
+        if (try_open_fonts(linux_fonts[i], font, big)) return true;
+
+    return false;
 }
 
 /* ---------- Carregar fase ---------- */
@@ -146,7 +189,7 @@ static void load_level(int idx) {
 static bool is_won(void) {
     for (int y = 0; y < B.h; y++)
         for (int x = 0; x < B.w; x++)
-            if (B.grid[y][x] == BOX) return false;   /* caixa fora de alvo */
+            if (B.grid[y][x] == BOX) return false;
     return true;
 }
 
@@ -179,14 +222,12 @@ static void move_player(int dx, int dy) {
         char beyond = B.grid[by][bx];
         if (beyond == WALL || beyond == BOX || beyond == BOXG) return;
         push_undo();
-        /* mover caixa */
         B.grid[by][bx] = is_goal_cell(beyond) ? BOXG : BOX;
         B.grid[ny][nx] = is_goal_cell(dest) ? GOAL : FLOOR;
         B.pushes++;
     } else {
         push_undo();
     }
-    /* mover player */
     char from = B.grid[B.py][B.px];
     B.grid[B.py][B.px] = (from == PLYRG) ? GOAL : FLOOR;
     char now = B.grid[ny][nx];
@@ -197,7 +238,6 @@ static void move_player(int dx, int dy) {
 
 /* ---------- Desenho dos tiles (estilo pixel-art CGA) ---------- */
 static void draw_wall(SDL_Renderer *r, int px, int py) {
-    /* parede de tijolos magenta */
     fill(r, px, py, TILE, TILE, C_DKMAG);
     int bh = TILE / 4;
     for (int row = 0; row < 4; row++) {
@@ -212,14 +252,12 @@ static void draw_wall(SDL_Renderer *r, int px, int py) {
 static void draw_floor(SDL_Renderer *r, int px, int py, bool goal) {
     fill(r, px, py, TILE, TILE, C_BLACK);
     if (goal) {
-        /* diamante ciano (alvo) — como no original */
         int cx = px + TILE/2, cy = py + TILE/2, s = TILE/4;
         SDL_Point d[5] = {
             { cx, cy - s }, { cx + s, cy }, { cx, cy + s }, { cx - s, cy }, { cx, cy - s }
         };
         set_color(r, C_CYAN);
         SDL_RenderDrawLines(r, d, 5);
-        /* preencher */
         for (int yy = -s; yy <= s; yy++) {
             int half = s - abs(yy);
             SDL_RenderDrawLine(r, cx - half, cy + yy, cx + half, cy + yy);
@@ -232,18 +270,14 @@ static void draw_box(SDL_Renderer *r, int px, int py, bool on_goal) {
     int m = 3;
     fill(r, px+m, py+m, TILE-2*m, TILE-2*m, sh);
     fill(r, px+m, py+m, TILE-2*m-2, TILE-2*m-2, top);
-    /* "X" de engradado */
     set_color(r, sh);
     SDL_RenderDrawLine(r, px+m, py+m, px+TILE-m-2, py+TILE-m-2);
     SDL_RenderDrawLine(r, px+TILE-m-2, py+m, px+m, py+TILE-m-2);
 }
 static void draw_player(SDL_Renderer *r, int px, int py) {
     int cx = px + TILE/2;
-    /* cabeça */
     fill(r, cx-4, py+3, 8, 7, C_WHITE);
-    /* corpo magenta (camisa) */
     fill(r, px+6, py+10, TILE-12, 9, C_MAGENTA);
-    /* pernas */
     fill(r, px+7, py+19, 4, 6, C_CYAN);
     fill(r, px+TILE-11, py+19, 4, 6, C_CYAN);
 }
@@ -263,8 +297,31 @@ static void draw_text_c(SDL_Renderer *r, TTF_Font *f, const char *txt, int cx, i
     draw_text(r, f, txt, cx - w/2, y, c);
 }
 
-/* ---------- Programa principal ---------- */
-typedef enum { SC_TITLE, SC_PLAY, SC_WIN } Scene;
+static void handle_key(Scene *scene, SDL_Keycode k, bool *running) {
+    if (k == SDLK_ESCAPE || k == SDLK_q) { *running = false; return; }
+
+    if (*scene == SC_TITLE) {
+        if (k == SDLK_RETURN || k == SDLK_SPACE) *scene = SC_PLAY;
+    }
+    else if (*scene == SC_PLAY) {
+        if (k == SDLK_UP || k == SDLK_w)    move_player(0,-1);
+        if (k == SDLK_DOWN || k == SDLK_s)  move_player(0, 1);
+        if (k == SDLK_LEFT || k == SDLK_a)  move_player(-1,0);
+        if (k == SDLK_RIGHT|| k == SDLK_d)  move_player( 1,0);
+        if (k == SDLK_u || k == SDLK_BACKSPACE) do_undo();
+        if (k == SDLK_r) load_level(level_index);
+        if (k == SDLK_n) { level_index = (level_index+1)%NLEVELS; load_level(level_index); }
+        if (k == SDLK_p) { level_index = (level_index-1+NLEVELS)%NLEVELS; load_level(level_index); }
+        if (is_won()) *scene = SC_WIN;
+    }
+    else if (*scene == SC_WIN) {
+        if (k == SDLK_RETURN || k == SDLK_SPACE || k == SDLK_n) {
+            level_index = (level_index+1)%NLEVELS;
+            load_level(level_index);
+            *scene = SC_PLAY;
+        }
+    }
+}
 
 int main(void) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) { fprintf(stderr, "SDL: %s\n", SDL_GetError()); return 1; }
@@ -273,23 +330,23 @@ int main(void) {
     int win_w = MAXW * TILE, win_h = MAXH * TILE + HUD;
     SDL_Window *win = SDL_CreateWindow("SOKO-BAN",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_w, win_h, 0);
+    if (!win) {
+        fprintf(stderr, "Janela: %s\n", SDL_GetError());
+        return 1;
+    }
+
     SDL_Renderer *ren = SDL_CreateRenderer(win, -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-    /* fonte: tenta algumas comuns no Linux */
-    const char *fonts[] = {
-        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf",
-        "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf",
-        NULL
-    };
-    TTF_Font *font = NULL, *big = NULL;
-    for (int i = 0; fonts[i]; i++) {
-        font = TTF_OpenFont(fonts[i], 18);
-        big  = TTF_OpenFont(fonts[i], 40);
-        if (font && big) break;
+    if (!ren) {
+        fprintf(stderr, "Renderer: %s\n", SDL_GetError());
+        return 1;
     }
-    if (!font) { fprintf(stderr, "Nenhuma fonte encontrada.\n"); return 1; }
+
+    TTF_Font *font = NULL, *big = NULL;
+    if (!open_fonts(&font, &big)) {
+        fprintf(stderr, "Nenhuma fonte encontrada.\n");
+        return 1;
+    }
 
     Scene scene = SC_TITLE;
     load_level(level_index);
@@ -299,35 +356,10 @@ int main(void) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) running = false;
-            if (e.type == SDL_KEYDOWN) {
-                SDL_Keycode k = e.key.keysym.sym;
-                if (k == SDLK_ESCAPE || k == SDLK_q) running = false;
-
-                if (scene == SC_TITLE) {
-                    if (k == SDLK_RETURN || k == SDLK_SPACE) scene = SC_PLAY;
-                }
-                else if (scene == SC_PLAY) {
-                    if (k == SDLK_UP || k == SDLK_w)    move_player(0,-1);
-                    if (k == SDLK_DOWN || k == SDLK_s)  move_player(0, 1);
-                    if (k == SDLK_LEFT || k == SDLK_a)  move_player(-1,0);
-                    if (k == SDLK_RIGHT|| k == SDLK_d)  move_player( 1,0);
-                    if (k == SDLK_u || k == SDLK_BACKSPACE) do_undo();
-                    if (k == SDLK_r) load_level(level_index);
-                    if (k == SDLK_n) { level_index = (level_index+1)%NLEVELS; load_level(level_index); }
-                    if (k == SDLK_p) { level_index = (level_index-1+NLEVELS)%NLEVELS; load_level(level_index); }
-                    if (is_won()) scene = SC_WIN;
-                }
-                else if (scene == SC_WIN) {
-                    if (k == SDLK_RETURN || k == SDLK_SPACE || k == SDLK_n) {
-                        level_index = (level_index+1)%NLEVELS;
-                        load_level(level_index);
-                        scene = SC_PLAY;
-                    }
-                }
-            }
+            if (e.type == SDL_KEYDOWN)
+                handle_key(&scene, e.key.keysym.sym, &running);
         }
 
-        /* ---- render ---- */
         set_color(ren, C_BLACK);
         SDL_RenderClear(ren);
 
@@ -339,7 +371,6 @@ int main(void) {
             draw_text_c(ren, font, "[ ENTER para jogar ]", win_w/2, 430, C_GOLD);
         }
         else {
-            /* tabuleiro centralizado */
             int ox = (win_w - B.w * TILE) / 2;
             int oy = (win_h - HUD - B.h * TILE) / 2;
             for (int y = 0; y < B.h; y++) {
@@ -358,7 +389,6 @@ int main(void) {
                     }
                 }
             }
-            /* HUD inferior (estilo barra do original) */
             fill(ren, 0, win_h - HUD, win_w, HUD, C_DKMAG);
             fill(ren, 0, win_h - HUD, win_w, 2, C_MAGENTA);
             char hud[160];
