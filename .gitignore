@@ -1,1 +1,44 @@
+# Compiled binary
 sokoban
+
+# Object & compiled files
+*.o
+*.obj
+*.a
+*.lo
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# Debug & profiling
+*.dSYM/
+*.su
+*.gcno
+*.gcda
+*.gcov
+core
+core.*
+vgcore.*
+perf.data
+perf.data.old
+
+# Build / dependency artifacts
+*.d
+build/
+bin/
+obj/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.clangd/
+compile_commands.json
+
+# OS files
+.DS_Store
+Thumbs.db
