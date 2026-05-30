@@ -27,7 +27,7 @@
 | Metric | Value |
 |--------|-------|
 | Phases complete | 0/4 |
-| Requirements mapped | 22/22 |
+| Requirements mapped | 23/23 |
 | Plans written | 0 |
 | Plans executed | 0 |
 
@@ -41,7 +41,8 @@
 |----------|-----------|-------|
 | Stack: C + SDL2 + OpenGL 3.3 | Brownfield — reutiliza base C/SDL2; sem custo de migração; GLAD 2 + cglm + cJSON como deps single-file | Pre-phase |
 | Perfis locais (sem backend) | Simplicidade v1; offline-first; sem dependência de rede | Pre-phase |
-| Fidelidade *inspired* (não pixel-perfect) | Adaptar ao macOS moderno mantendo espírito 1984 | Pre-phase |
+| Fidelidade *inspired* (não pixel-perfect) | Adaptar a desktops modernos mantendo espírito 1984 | Pre-phase |
+| Plataformas v1: macOS + Linux | Ambos os SOs são targets de primeira classe; verificar build em cada fase | Pre-phase |
 | Modo MVP vertical | Entregar fatias jogáveis end-to-end por fase; nunca deixar o jogo não-jogável | Pre-phase |
 | Granularidade coarse (4 fases) | Solo dev + Claude; fases grandes e coesas > muitas fases pequenas | Pre-phase |
 | Painter's Algorithm para depth | Correto para isométrico 2.5D; evita z-fighting sem depth buffer complexo | Pre-phase |
@@ -50,7 +51,7 @@
 
 ### Todos
 
-- [ ] Verificar integração SDL2 + OpenGL no macOS Sequoia (arm64) — fazer no primeiro commit de Phase 1
+- [ ] Verificar integração SDL2 + OpenGL no macOS Sequoia (arm64) e Linux — fazer no primeiro commit de Phase 1
 - [ ] Extrair `game_logic.c` como primeiro commit de Phase 1, verificar jogo ainda roda antes de tocar OpenGL
 - [ ] Definir estratégia Painter's Algorithm (depth sort por col+row) antes de iniciar renderização 3D
 - [ ] Time-box animação do elevador em Phase 2: placeholder funcional primeiro; animação por cima como polish
@@ -62,7 +63,9 @@ None
 
 ### Warnings
 
+- **Dual platform:** Cada fase deve passar `make` em macOS e Linux antes de considerar done
 - **macOS OpenGL cap 4.1:** Usar `#version 330 core`; testar no macOS no primeiro commit com GL, não depois
+- **Linux OpenGL:** Linkar `-lGL`; shaders devem usar mesma versão 330 core que macOS
 - **HiDPI/Retina:** Usar `SDL_GL_GetDrawableSize` para viewport; nunca hardcodar dimensões de janela
 - **Scope creep:** Intro e animação do elevador podem consumir todo o tempo — critério de done não pode depender de animação perfeita
 - **Big-bang refactoring:** Nunca extrair `game_logic` e adicionar 3D no mesmo commit; uma mudança por vez, jogo sempre jogável

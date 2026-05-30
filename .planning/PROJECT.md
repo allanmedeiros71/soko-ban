@@ -39,8 +39,8 @@ navegação por elevador.
 ### Out of Scope
 
 - Contas online / backend de autenticação — v1 usa perfis locais apenas
-- Recriação pixel-perfect frame-a-frame do original — abordagem *inspired*, adaptada ao macOS moderno
-- Suporte mobile/iOS — foco macOS desktop (base já compilável no MacBook)
+- Recriação pixel-perfect frame-a-frame do original — abordagem *inspired*, adaptada a desktops modernos
+- Suporte mobile/iOS — foco desktop (macOS + Linux)
 - Multiplayer / ranking online — não solicitado
 - Editor de fases completo (Edit) — escopo a detalhar na Fase de menus; MVP pode ser placeholder
 
@@ -53,13 +53,14 @@ TITLE / PLAY / WIN. Tabuleiro codificado em grid ASCII.
 **Referência:** `descricao.md` descreve features visuais e de UX do Sokoban original 1984.
 Fidelidade *inspired* — mesma mecânica e espírito retro, UX adaptada.
 
-**Plataforma alvo:** macOS (MacBook) como ambiente principal de desenvolvimento e execução;
-Linux permanece suportado via Make.
+**Plataformas alvo:** macOS e Linux — ambas são targets de primeira classe para compilação,
+execução e verificação via `make`. macOS é o ambiente principal de desenvolvimento do autor;
+Linux permanece suportado desde a base 2D existente.
 
 ## Constraints
 
 - **Tech**: Manter C como linguagem principal; evoluir stack para 3D via SDL2 + OpenGL (decisão recomendada para brownfield)
-- **Compatibilidade**: macOS desktop como target primário
+- **Compatibilidade**: macOS e Linux como targets de v1; cada fase deve compilar e rodar em ambos
 - **Arquitetura**: Preservar lógica de tabuleiro/movement/undo existente; substituir camada de render
 - **Perfis**: Armazenamento local (JSON ou similar), sem dependência de rede
 - **Escopo**: Granularidade coarse (3–5 fases), modo MVP vertical
@@ -69,8 +70,9 @@ Linux permanece suportado via Make.
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Perfis locais (sem backend) | Simplicidade v1, offline-first | — Pending |
-| Fidelidade *inspired* (não pixel-perfect) | Adaptar ao macOS moderno mantendo espírito 1984 | — Pending |
-| Stack 3D: C + SDL2 + OpenGL | Brownfield: reutiliza base C/SDL2/macOS; raylib exigiria migração maior; Godot reescreveria tudo | — Pending |
+| Fidelidade *inspired* (não pixel-perfect) | Adaptar a desktops modernos mantendo espírito 1984 | — Pending |
+| Stack 3D: C + SDL2 + OpenGL | Brownfield: reutiliza base C/SDL2; OpenGL funciona em macOS e Linux | — Pending |
+| Plataformas v1: macOS + Linux | Jogo nasce multiplataforma; ambos os SOs verificados a cada fase | — Pending |
 | Modo MVP vertical | Entregar fatias jogáveis end-to-end por fase | — Pending |
 | Modo YOLO | Auto-aprovar artefatos de planejamento | — Pending |
 
@@ -92,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-29 after initialization*
+*Last updated: 2026-05-29 after platform scope clarification (macOS + Linux)*

@@ -16,7 +16,7 @@ navegação por elevador.
 ### Constraints
 
 - **Tech**: Manter C como linguagem principal; evoluir stack para 3D via SDL2 + OpenGL (decisão recomendada para brownfield)
-- **Compatibilidade**: macOS desktop como target primário
+- **Compatibilidade**: macOS e Linux como targets de v1; verificar build em ambos a cada fase
 - **Arquitetura**: Preservar lógica de tabuleiro/movement/undo existente; substituir camada de render
 - **Perfis**: Armazenamento local (JSON ou similar), sem dependência de rede
 - **Escopo**: Granularidade coarse (3–5 fases), modo MVP vertical
@@ -46,10 +46,10 @@ navegação por elevador.
 - **libsdl2-ttf-dev** — SDL2_ttf development headers
 - No test framework — no automated tests present
 ## Platform / OS
-- Font paths are Linux-specific (`/usr/share/fonts/...`)
-- Package install documented for Debian/Ubuntu/Mint, Fedora, Arch/Manjaro
-- No Windows or macOS support indicated
-- Single-file program: all logic in `sokoban.c` (~400 lines)
+- **macOS** — Homebrew (`sdl2`, `sdl2_ttf`), `clang`, HiDPI/Retina
+- **Linux** — `libsdl2-dev`, `libsdl2-ttf-dev`, `gcc`, `make`
+- Fonte embarcada em `assets/fonts/` + fallback por SO
+- Single-file program (evoluindo para módulos na migração 3D)
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->

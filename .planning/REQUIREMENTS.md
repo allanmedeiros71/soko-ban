@@ -39,8 +39,9 @@
 
 ### Plataforma
 
-- [ ] **PLAT-01**: Compila e executa no macOS (MacBook) via Make
-- [ ] **PLAT-02**: Suporte HiDPI/Retina sem distorção de viewport OpenGL
+- [ ] **PLAT-01**: Compila e executa via `make` em macOS e Linux
+- [ ] **PLAT-02**: Suporte HiDPI/Retina no macOS sem distorção de viewport OpenGL
+- [ ] **PLAT-03**: OpenGL e paths de assets funcionam no Linux (libGL, fonte embarcada, perfis locais)
 
 ## v2 Requirements
 
@@ -63,8 +64,8 @@
 | Feature | Reason |
 |---------|--------|
 | Contas online / backend | Decisão v1: perfis locais apenas |
-| Recriação pixel-perfect frame-a-frame | Abordagem *inspired*, adaptada ao macOS |
-| Mobile / iOS | Foco macOS desktop |
+| Recriação pixel-perfect frame-a-frame | Abordagem *inspired*, adaptada a desktops modernos |
+| Mobile / iOS | Foco desktop macOS + Linux |
 | Multiplayer / ranking online | Não solicitado |
 | Solver / hints automáticos | Anti-feature — reduz puzzle |
 | Deadlock detection | Complexidade desproporcional para v1 |
@@ -86,6 +87,7 @@
 | VIS-05 | Phase 1 | 3D Foundation | Pending |
 | PLAT-01 | Phase 1 | 3D Foundation | Pending |
 | PLAT-02 | Phase 1 | 3D Foundation | Pending |
+| PLAT-03 | Phase 1 | 3D Foundation | Pending |
 | MENU-02 | Phase 2 | Elevator Menu | Pending |
 | MENU-03 | Phase 2 | Elevator Menu | Pending |
 | MENU-04 | Phase 2 | Elevator Menu | Pending |
@@ -98,10 +100,10 @@
 | MENU-01 | Phase 4 | Opening Intro | Pending |
 
 **Coverage:**
-- v1 requirements: 22 total
-- Mapped to phases: 22
+- v1 requirements: 23 total
+- Mapped to phases: 23
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-29*
-*Last updated: 2026-05-29 after roadmap creation*
+*Last updated: 2026-05-29 after platform scope clarification (macOS + Linux)*

@@ -22,12 +22,12 @@
 **Goal**: O jogo atual roda com visual 3D isométrico — paredes de tijolo, caixotes e personagem em 3D — e toda mecânica de gameplay está 100% preservada
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
-**Requirements**: VIS-01, VIS-02, VIS-03, VIS-04, VIS-05, GAME-01, GAME-02, GAME-03, GAME-04, GAME-05, PLAT-01, PLAT-02
+**Requirements**: VIS-01, VIS-02, VIS-03, VIS-04, VIS-05, GAME-01, GAME-02, GAME-03, GAME-04, GAME-05, PLAT-01, PLAT-02, PLAT-03
 **Success Criteria** (what must be TRUE):
   1. Jogador abre o jogo e vê o tabuleiro em perspectiva isométrica 3D — paredes com tijolos, caixotes com volume, personagem blocky legível
   2. Toda mecânica existente funciona sem regressão: mover em 4 direções, empurrar uma caixa por vez, undo, reiniciar fase, detectar vitória
   3. HUD exibe fase atual, contador de movimentos, empurrões e tempo durante a partida
-  4. Jogo compila e executa via `make` em macOS (Apple Silicon, HiDPI/Retina sem distorção de viewport)
+  4. Jogo compila e executa via `make` em macOS (HiDPI/Retina) e Linux sem distorção de viewport OpenGL
   5. Paleta retro CGA e marcadores de alvo preservados na estética 3D
 **Plans**: TBD
 
@@ -97,6 +97,7 @@
 | VIS-05 | Phase 1 | Renderização 3D |
 | PLAT-01 | Phase 1 | Plataforma |
 | PLAT-02 | Phase 1 | Plataforma |
+| PLAT-03 | Phase 1 | Plataforma |
 | MENU-02 | Phase 2 | Menus |
 | MENU-03 | Phase 2 | Menus |
 | MENU-04 | Phase 2 | Menus |
@@ -108,8 +109,8 @@
 | MENU-05 | Phase 3 | Menus |
 | MENU-01 | Phase 4 | Menus |
 
-**Coverage: 22/22 v1 requirements mapped ✓**
+**Coverage: 23/23 v1 requirements mapped ✓**
 
 ---
 *Roadmap created: 2026-05-29*
-*Last updated: 2026-05-29 after initialization*
+*Last updated: 2026-05-29 after platform scope clarification (macOS + Linux)*
